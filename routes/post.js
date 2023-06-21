@@ -9,17 +9,24 @@ const Users = require('../schemas/users.js');
 // 전체 게시글 조회 API
 router.get('/posts', async (req, res) => {
   try {
-    const posts = await Posts.find({})
-      .select(' -password -__v') // 데이터베이스에서 mongoos메서드 select를 사용해서 특정 필드들을 제외 한 후
-      // 나머지 게시물을 조회하고, 작성 날짜 기준으로 내림차순으로 정렬합니다.
+    // 작성자 정보를 제외한 모든 필드를 선택하고, 작성 날짜를 기준으로 내림차순 정렬하여 사용자 정보를 조회합니다.
+    const users = await Users.find({})
+      .select('-password -__v')
       .sort({ createdAt: -1 });
-    // 조회된 게시물이 없을때 에러메시지를 응답 합니다.
+
+    // 작성자 정보를 제외한 모든 필드를 선택하고, 작성 날짜를 기준으로 내림차순 정렬하여 게시물을 조회합니다.
+    const posts = await Posts.find({})
+      .select('-password -__v')
+      .sort({ createdAt: -1 });
+
+    // 조회된 게시물이 없을 때 에러 메시지를 응답합니다.
     if (!posts || posts.length === 0) {
       res.status(404).json({ error: '존재하는 게시물이 없습니다.' });
+      return; // 추가된 return 문을 통해 함수 실행 종료
     }
 
-    // 조회된 게시물을 응답합니다.
-    res.json({ data: posts });
+    // 게시물과 작성자 정보를 함께 응답합니다.
+    res.json({ data: { users, posts } });
   } catch (error) {
     // 오류가 발생한 경우 오류 메시지를 응답합니다.
     res.status(500).json({ error: '게시물 조회에 실패했습니다.' });

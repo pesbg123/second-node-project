@@ -2,6 +2,13 @@ const mongoose = require('mongoose');
 
 // 'Comments'에 대한 스키마 정의
 const commentsSchema = new mongoose.Schema({
+  // commentId 필드: 문자열 타입, 필수 입력, 고유한 값
+  commentId: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+
   // params로 가져온 게시글 id
   postId: {
     type: String,

@@ -1,18 +1,23 @@
 const mongoose = require('mongoose');
 // 'Posts'에 대한 스키마 정의
 const postsSchema = new mongoose.Schema({
+  // postId 필드: 문자열 타입, 필수 입력, 고유한 값
+  postId: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+
   // user 필드: 문자열 타입, 필수 입력, 고유한 값
   user: {
     type: String,
     required: true,
-    unique: true,
   },
 
   // password 필드: 숫자 타입, 필수 입력
   password: {
     type: Number,
     required: true,
-    unique: true,
   },
 
   // title 필드: 문자열 타입, 필수 입력

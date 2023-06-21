@@ -3,13 +3,13 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const { ObjectId } = mongoose.Types;
 
-// Posts 모델을 가져옵니다.
 const Posts = require('../schemas/posts.js');
+const Users = require('../schemas/users.js');
 
 // 전체 게시글 조회 API
 router.get('/posts', async (req, res) => {
   try {
-    const posts = await Posts.find()
+    const posts = await Posts.find({})
       .select(' -password -__v') // 데이터베이스에서 mongoos메서드 select를 사용해서 특정 필드들을 제외 한 후
       // 나머지 게시물을 조회하고, 작성 날짜 기준으로 내림차순으로 정렬합니다.
       .sort({ createdAt: -1 });

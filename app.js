@@ -14,7 +14,6 @@ connect();
 
 // body 파서 미들웨어를 사용하기 위한 설정
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 // postsRouter를 '/' 경로에 적용

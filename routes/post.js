@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
-const { ObjectId } = mongoose.Types;
+const authMiddleware = require('../middlewares/auth-middleware.js');
 
 const Posts = require('../schemas/posts.js');
 const Users = require('../schemas/users.js');
@@ -26,7 +26,7 @@ router.get('/posts', async (req, res) => {
     }
 
     // 게시물과 작성자 정보를 함께 응답합니다.
-    res.json({ data: { users, posts } });
+    res.json({ data: posts });
   } catch (error) {
     // 오류가 발생한 경우 오류 메시지를 응답합니다.
     res.status(500).json({ error: '게시물 조회에 실패했습니다.' });
@@ -34,24 +34,13 @@ router.get('/posts', async (req, res) => {
 });
 
 // 게시글 작성 API
-router.post('/posts', async (req, res) => {
-  const { user, password, title, content } = req.body;
-
-  // 이미 존재하는 게시물인지 확인합니다.
-  const existingPosts = await Posts.find({ user });
-  if (existingPosts.length) {
-    return res.status(400).json({
-      success: false,
-      errorMessage: '중복되는 게시물이 존재합니다.',
-    });
-  }
-
+router.post('/posts', authMiddleware, async (req, res) => {
+  const { title, content } = req.body;
+  const { user } = res.locals;
   // 새로운 게시물을 생성합니다.
-  const postId = new ObjectId().toHexString();
   const createdPosts = await Posts.create({
-    postId,
-    user,
-    password,
+    userId: user.userId,
+    nickname: user.nickname,
     title,
     content,
     createdAt: new Date(),
@@ -88,9 +77,10 @@ router.get('/posts/:title', async (req, res) => {
 });
 
 // 게시글 수정 API
-router.put('/posts/:postId', async (req, res) => {
+router.patch('/posts/:postId', authMiddleware, async (req, res) => {
   const { postId } = req.params;
-  const { password, title, content } = req.body;
+  const { title, content } = req.body;
+  const { user } = res.locals;
 
   try {
     // title, content에 아무것도 입력하지 않을시 에러 응답을 보냅니다.
@@ -101,16 +91,19 @@ router.put('/posts/:postId', async (req, res) => {
       });
     }
 
-    // MongoDB에서 해당 postId와 password를 가진 게시물을 조회합니다.
-    const post = await Posts.findOne({ postId, password });
+    const post = await Posts.findById(postId);
 
     if (!post) {
       // 게시물이 존재하지 않을 경우 에러 응답을 보냅니다.
       return res.status(404).json({ error: '게시물을 찾을 수 없습니다.' });
     }
 
+    if (user.userId !== post.userId) {
+      return res.status(400).json({ error: '접근이 허용되지 않습니다.' });
+    }
+
     // 게시물을 업데이트합니다.
-    await Posts.updateOne({ postId, password }, { $set: { title, content } });
+    await Posts.updateOne({ _id: postId }, { $set: { title, content } });
 
     // 수정된 게시물을 응답합니다.
     res.json({ message: '게시물 수정에 성공했습니다.' });
@@ -121,27 +114,25 @@ router.put('/posts/:postId', async (req, res) => {
 });
 
 // 게시글 삭제 API
-router.delete('/posts/:postId', async (req, res) => {
+router.delete('/posts/:postId', authMiddleware, async (req, res) => {
   const { postId } = req.params;
-  const { password } = req.body;
+  const { user } = res.locals;
 
   try {
     // MongoDB에서 해당 postId를 가진 게시물을 조회합니다.
-    const post = await Posts.findOne({ postId: postId });
-    console.log(post);
+    const post = await Posts.findById(postId);
 
     if (!post) {
       // 게시물이 존재하지 않을 경우 에러 응답을 보냅니다.
       return res.status(404).json({ error: '게시물을 찾을 수 없습니다.' });
     }
 
-    // 비밀번호를 비교하여 일치하지 않을 경우 에러 응답을 보냅니다.
-    if (post.password !== password) {
-      return res.status(401).json({ error: '비밀번호가 일치하지 않습니다.' });
+    if (user.userId !== post.userId) {
+      return res.status(400).json({ error: '접근이 허용되지 않습니다.' });
     }
 
     // MongoDB에서 해당 postId를 가진 게시물을 삭제합니다.
-    await Posts.findOneAndDelete({ postId: post.postId });
+    await Posts.findOneAndDelete({ _id: postId });
 
     // 삭제된 게시물을 응답합니다.
     res.json({ message: '게시물이 삭제되었습니다.' });

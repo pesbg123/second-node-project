@@ -3,6 +3,8 @@
 Lv_2-node-project-solo 
 ├─ .DS_Store
 ├─ app.js
+├─ middlewares
+│  └─ auth-middleware.js
 ├─ package-lock.json
 ├─ package.json
 ├─ routes

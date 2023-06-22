@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../schemas/users.js');
+const mongoose = require('mongoose');
 
 const authMiddleware = require('../middlewares/auth-middleware');
 
@@ -33,7 +34,9 @@ router.post('/users', async (req, res) => {
     });
     return;
   }
-  const user = new User({ email, nickname, password });
+
+  const userId = new ObjectId().toHexString();
+  const user = new User({ userId, email, nickname, password });
   await user.save(); // DB에 저장
 
   return res.status(201).json({});

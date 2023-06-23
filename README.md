@@ -18,5 +18,4 @@ Lv_2-node-project-solo
 ├─ .gitignore
 │
 └─ app.js
-
 ```

@@ -1,11 +1,13 @@
 const mongoose = require('mongoose');
 // 'Posts'에 대한 스키마 정의
 const postsSchema = new mongoose.Schema({
+  // nickname 필드: 문자열 타입, 필수 입력
   nickname: {
     type: String,
     required: true,
   },
 
+  // userId 필드: 문자열 타입, 필수 입력
   userId: {
     type: String,
     required: true,

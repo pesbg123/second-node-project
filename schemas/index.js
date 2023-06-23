@@ -13,5 +13,5 @@ mongoose.connection.on('error', (err) => {
   console.error('몽고디비 연결 에러', err);
 });
 
-// connect 함수를 모듈의 기본 내보내기로 설정하여 다른 파일에서 사용할 수 있게 합니다.
+// connect 함수를 외부로 내보냅니다.
 module.exports = connect;

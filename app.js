@@ -19,5 +19,5 @@ app.use('/', [postsRouter, commentsRouter, userRouter, authRouter]);
 // 이 미들웨어들은 각각 '/posts', '/comments', '/users', '/auth' 경로에 대한 요청을 처리합니다.
 
 app.listen(port, () => {
-  console.log(port, '포트로 서버가 열렸어요!'); // 서버가 시작되면 콘솔에 포트 번호를 출력합니다.
+  console.log(`${port}번 포트로 서버가 열려써요`); // 서버가 시작되면 콘솔에 포트 번호를 출력합니다.
 });
